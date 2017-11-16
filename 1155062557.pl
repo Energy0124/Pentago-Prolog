@@ -1,24 +1,9 @@
+%testcase:
 %threatening(board([3,4,9,10,21,26,27,33],[5,8,11,15,17,22,29,31]),black,S).
 %threatening(board([5,8,11,15,17,22,29,31],[3,4,9,10,21,26,27,33]),black,S).
 %threatening(board([2,4,10,16,21,26,27],[5,8,12,15,24,29]),red, S).
-threatening(board(B,R),CurrentPlayer,ThreatsCount) :- 
-    (CurrentPlayer == black -> set_board(R, Board, B, OtherBoard); set_board(B, Board, R, OtherBoard)),
-    aggregate_all(count, almost_win(Board, OtherBoard), ThreatsCount).
 
-set_board(A, BoardA, B, BoardB) :- A = BoardA, B = BoardB.
-
-almost_win(Board, OtherBoard):- 
-    win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size = 4,subtract(WinCond, I, Result), 
-    intersection(Result, OtherBoard, Miss), length(Miss, MissSize), MissSize == 0.
-
-% almost_win(Board, OtherBoard, Count, FCount):- win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size >= 4,
-% subtract(WinCond, I, Result), intersection(Result, OtherBoard, Miss), length(Miss, MissSize), (MissSize == 0 -> succ(Count, FCount); FCount = Count).
-
-%pentago_ai(board([2,4,10,16,21,26,27],[5,8,12,15,24,29]),black,BestMove,NextBoard).
-pentago_ai(Board,CurrentPlayer,BestMove,NextBoard) :- 
-    BestMove = move(3,clockwise,top-right), NextBoard = board([2,3,4,5,6,21,26,27], [8,12,15,17,24,29]).
-
-
+%winning row
 win([1,7,13,19,25]).
 win([5,11,17,23,29]).
 win([8,9,10,11,12]).
@@ -51,3 +36,33 @@ win([4,10,16,22,28]).
 win([8,14,20,26,32]).
 win([12,17,22,27,32]).
 win([32,33,34,35,36]).
+
+% start threatening
+
+threatening(board(B,R),CurrentPlayer,ThreatsCount) :- 
+    (CurrentPlayer == black -> set_board(R, Board, B, OtherBoard); set_board(B, Board, R, OtherBoard)),
+    aggregate_all(count, almost_win(Board, OtherBoard), ThreatsCount).
+
+set_board(A, BoardA, B, BoardB) :- A = BoardA, B = BoardB.
+
+almost_win(Board, OtherBoard):- 
+    win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size = 4,subtract(WinCond, I, Result), 
+    intersection(Result, OtherBoard, Miss), length(Miss, MissSize), MissSize == 0.
+
+% done threatening lol
+
+%start pentago_ai
+
+%testcase
+%pentago_ai(board([2,4,10,16,21,26,27],[5,8,12,15,24,29]),black,BestMove,NextBoard).
+
+pentago_ai(board(B,R),CurrentPlayer, BestMove,NextBoard) :-  
+    (CurrentPlayer == black -> set_board(B, Board, R, OtherBoard); set_board(R, Board, B, OtherBoard)),
+   can_win(Board, OtherBoard, M, MyNextBoard, OtherNextBoard), 
+   BestMove = move(M, clockwise, top-right), NextBoard = board( MyNextBoard, OtherNextBoard).
+
+can_win(Board, OtherBoard, M, MyNextBoard, OtherNextBoard):- 
+    win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size = 4,subtract(WinCond, I, Move), 
+    intersection(Move, OtherBoard, Miss), length(Miss, MissSize),  MissSize == 0, [M] = Move, 
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, !.
+
