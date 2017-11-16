@@ -1,10 +1,12 @@
-threatening(board(B,R),CurrentPlayer,ThreatsCount) :- (CurrentPlayer == black -> set_board(R, Board, B, OtherBoard); Board = set_board(B, Board, R, OtherBoard)),
-aggregate_all(count, almost_win(Board, OtherBoard), ThreatsCount).
+threatening(board(B,R),CurrentPlayer,ThreatsCount) :- 
+    (CurrentPlayer == black -> set_board(R, Board, B, OtherBoard); Board = set_board(B, Board, R, OtherBoard)),
+    aggregate_all(count, almost_win(Board, OtherBoard), ThreatsCount).
 
 set_board(A,ABoard, B, Bboard) :- A = ABoard, B = Bboard.
 
-almost_win(Board, OtherBoard):- win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size >= 4,
-subtract(WinCond, I, Result), intersection(Result, OtherBoard, Miss), length(Miss, MissSize), MissSize == 0.
+almost_win(Board, OtherBoard):- 
+    win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size >= 4,subtract(WinCond, I, Result), 
+    intersection(Result, OtherBoard, Miss), length(Miss, MissSize), MissSize == 0.
 
 % almost_win(Board, OtherBoard, Count, FCount):- win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size >= 4,
 % subtract(WinCond, I, Result), intersection(Result, OtherBoard, Miss), length(Miss, MissSize), (MissSize == 0 -> succ(Count, FCount); FCount = Count).
