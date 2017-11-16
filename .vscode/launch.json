@@ -1,0 +1,39 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Debug Prolog Files",
+            "type": "prolog",
+            "request": "launch",
+            "runtimeExecutable": "C:\\Program Files\\pl\\bin\\swipl.exe",
+            "runtimeArgs": [],
+            "env": {},
+            "program": "${file}",
+            "cwd": "${fileDirname}",
+            "startupQuery": "threatening(board([3,4,9,10,21,26,27,33],[5,8,11,15,17,22,29,31]),black,S)",
+            "stopOnEntry": true,
+            "traceCmds": {
+                "continue": [
+                    "leap",
+                    "l"
+                ],
+                "stepover": [
+                    "skip",
+                    "s"
+                ],
+                "stepinto": [
+                    "creep",
+                    "c"
+                ],
+                "stepout": [
+                    "up",
+                    "u"
+                ]
+            }
+        }
+    ]
+}
