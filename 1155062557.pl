@@ -66,20 +66,92 @@ pentago_ai(board(B,R),CurrentPlayer, BestMove,NextBoard) :-
    can_win(Board, OtherBoard, M, D, Q, MyNextBoard, OtherNextBoard), 
    BestMove = move(M, D, Q), NextBoard = board( MyNextBoard, OtherNextBoard).
 
-can_win(Board, OtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+can_almost_win(Board, OtherBoard, Move):-
     win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size = 4,subtract(WinCond, I, Move), 
-    intersection(Move, OtherBoard, Miss), length(Miss, MissSize),  MissSize == 0, [M] = Move, 
+    intersection(Move, OtherBoard, Miss), length(Miss, MissSize),  MissSize == 0.
+
+% no rotation win 
+can_win(Board, OtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    can_almost_win(Board, OtherBoard, Move), [M] = Move, 
     append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
     D = clockwise, Q= top-left, !.
 
+% clockwise win
 can_win(OldBoard, OldOtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
-    rotate(clockwise, top-left, OldBoard, Board), rotate(clockwise, top-left, OldOtherBoard, OtherBoard), 
-    win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size = 4,subtract(WinCond, I, Move), 
-    intersection(Move, OtherBoard, Miss), length(Miss, MissSize),  MissSize == 0, [X] = Move, 
-    (in_quadrant(top-left, X) -> rotate(anti-clockwise, top-left, Move, [M]); M = X), 
+    D = clockwise, Q = top-left,
+    rotate(D, Q, OldBoard, Board), 
+    rotate(D, Q, OldOtherBoard, OtherBoard), 
+    can_almost_win(Board, OtherBoard, Move), [X] = Move, 
+    (in_quadrant(Q, X) -> rotate(anti-clockwise, Q, Move, [M]); M = X), 
     append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
-    D=clockwise, Q=top-left, !.
+    !.
 
+can_win(OldBoard, OldOtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    D = clockwise, Q = top-right,
+    rotate(D, Q, OldBoard, Board), 
+    rotate(D, Q, OldOtherBoard, OtherBoard), 
+    can_almost_win(Board, OtherBoard, Move), [X] = Move, 
+    (in_quadrant(Q, X) -> rotate(anti-clockwise, Q, Move, [M]); M = X), 
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
+    !.
+
+can_win(OldBoard, OldOtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    D = clockwise, Q = bottom-left,
+    rotate(D, Q, OldBoard, Board), 
+    rotate(D, Q, OldOtherBoard, OtherBoard), 
+    can_almost_win(Board, OtherBoard, Move), [X] = Move, 
+    (in_quadrant(Q, X) -> rotate(anti-clockwise, Q, Move, [M]); M = X), 
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
+    !.
+
+can_win(OldBoard, OldOtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    D = clockwise, Q = bottom-right,
+    rotate(D, Q, OldBoard, Board), 
+    rotate(D, Q, OldOtherBoard, OtherBoard), 
+    can_almost_win(Board, OtherBoard, Move), [X] = Move, 
+    (in_quadrant(Q, X) -> rotate(anti-clockwise, Q, Move, [M]); M = X), 
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
+    !.
+
+%anti clockwise win
+can_win(OldBoard, OldOtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    D = anti-clockwise, Q = top-left,
+    rotate(D, Q, OldBoard, Board), 
+    rotate(D, Q, OldOtherBoard, OtherBoard), 
+    can_almost_win(Board, OtherBoard, Move), [X] = Move, 
+    (in_quadrant(Q, X) -> rotate(clockwise, Q, Move, [M]); M = X), 
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
+    !.
+
+can_win(OldBoard, OldOtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    D = anti-clockwise, Q = top-right,
+    rotate(D, Q, OldBoard, Board), 
+    rotate(D, Q, OldOtherBoard, OtherBoard), 
+    can_almost_win(Board, OtherBoard, Move), [X] = Move, 
+    (in_quadrant(Q, X) -> rotate(clockwise, Q, Move, [M]); M = X), 
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
+    !.
+
+can_win(OldBoard, OldOtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    D = anti-clockwise, Q = bottom-left,
+    rotate(D, Q, OldBoard, Board), 
+    rotate(D, Q, OldOtherBoard, OtherBoard), 
+    can_almost_win(Board, OtherBoard, Move), [X] = Move, 
+    (in_quadrant(Q, X) -> rotate(clockwise, Q, Move, [M]); M = X), 
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
+    !.
+
+can_win(OldBoard, OldOtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    D = anti-clockwise, Q = bottom-right,
+    rotate(D, Q, OldBoard, Board), 
+    rotate(D, Q, OldOtherBoard, OtherBoard), 
+    can_almost_win(Board, OtherBoard, Move), [X] = Move, 
+    (in_quadrant(Q, X) -> rotate(clockwise, Q, Move, [M]); M = X), 
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
+    !.
+
+
+% rotation 
 replace(_, _, [], []).
 replace(O, R, [O|T], [R|T2]) :- replace(O, R, T, T2).
 replace(O, R, [H|T], [H|T2]) :- dif(H,O), replace(O, R, T, T2).
@@ -141,6 +213,7 @@ replaceA([], []).
 replaceA([O|T], [RA|T2]) :- atom_concat(a, R, O),  atom_number(R, RA), replaceA( T, T2), !.
 replaceA([H|T], [H|T2]) :- replaceA(T, T2).
 
+%end of rotation
 
 % replace_first(X,Y,Xs,Ys) :-
 %     same_length(Xs,Ys),
