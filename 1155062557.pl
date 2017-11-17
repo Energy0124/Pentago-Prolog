@@ -63,8 +63,22 @@ in_quadrant(bottom-rigt, X):- member(X, [22,23,24,28,30,34,35,36]).
 
 pentago_ai(board(B,R),CurrentPlayer, BestMove,NextBoard) :-  
     (CurrentPlayer == black -> set_board(B, Board, R, OtherBoard); set_board(R, Board, B, OtherBoard)),
-   can_win(Board, OtherBoard, M, D, Q, MyNextBoard, OtherNextBoard), 
-   BestMove = move(M, D, Q), NextBoard = board( MyNextBoard, OtherNextBoard).
+    (
+        can_win(Board, OtherBoard, M, D, Q, MyNextBoard, OtherNextBoard) -> 
+        BestMove = move(M, D, Q), NextBoard = board( MyNextBoard, OtherNextBoard);
+        true
+    ).
+
+threats_count(Board,OtherBoard,ThreatsCount) :- 
+    aggregate_all(count, almost_win(Board, OtherBoard), ThreatsCount).
+
+calc_best_move(Board, OtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size >=3 ,subtract(WinCond, I, Result), 
+    intersection(Result, OtherBoard, Occupied), length(Occupied, OccupiedSize), OccupiedSize == 0,
+    threats_count(Board, OtherBoard, ThreatsCount). 
+
+
+
 
 can_almost_win(Board, OtherBoard, Move):-
     win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size = 4,subtract(WinCond, I, Move), 
