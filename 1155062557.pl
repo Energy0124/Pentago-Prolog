@@ -56,21 +56,29 @@ almost_win(Board, OtherBoard):-
 %testcase
 %pentago_ai(board([2,4,10,16,21,26,27],[5,8,12,15,24,29]),black,BestMove,NextBoard).
 
+in_quadrant(top-left, X):- member(X, [1,2,3,7,9,13,14,15]).
+in_quadrant(top-right, X):- member(X, [4,5,6,10,12,16,17,18]).
+in_quadrant(bottom-left, X):- member(X, [19,20,21,25,27,31,32,33]).
+in_quadrant(bottom-rigt, X):- member(X, [22,23,24,28,30,34,35,36]).
+
 pentago_ai(board(B,R),CurrentPlayer, BestMove,NextBoard) :-  
     (CurrentPlayer == black -> set_board(B, Board, R, OtherBoard); set_board(R, Board, B, OtherBoard)),
-   can_win(Board, OtherBoard, M, MyNextBoard, OtherNextBoard), 
-   BestMove = move(M, clockwise, top-right), NextBoard = board( MyNextBoard, OtherNextBoard).
+   can_win(Board, OtherBoard, M, D, Q, MyNextBoard, OtherNextBoard), 
+   BestMove = move(M, D, Q), NextBoard = board( MyNextBoard, OtherNextBoard).
 
-can_win(Board, OtherBoard, M, MyNextBoard, OtherNextBoard):- 
+can_win(Board, OtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
     win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size = 4,subtract(WinCond, I, Move), 
     intersection(Move, OtherBoard, Miss), length(Miss, MissSize),  MissSize == 0, [M] = Move, 
-    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, !.
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
+    D = clockwise, Q= top-left, !.
 
-can_win(OldBoard, OldOtherBoard, M, MyNextBoard, OtherNextBoard):- 
-    rotate(clockwise, top-right, OldBoard, Board), rotate(clockwise, top-right, OldOtherBoard, OtherBoard), 
+can_win(OldBoard, OldOtherBoard, M, D, Q, MyNextBoard, OtherNextBoard):- 
+    rotate(clockwise, top-left, OldBoard, Board), rotate(clockwise, top-left, OldOtherBoard, OtherBoard), 
     win(WinCond), intersection(WinCond, Board, I), length(I, Size), Size = 4,subtract(WinCond, I, Move), 
-    intersection(Move, OtherBoard, Miss), length(Miss, MissSize),  MissSize == 0, [M] = Move, 
-    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, !.
+    intersection(Move, OtherBoard, Miss), length(Miss, MissSize),  MissSize == 0, [X] = Move, 
+    (in_quadrant(top-left, X) -> rotate(anti-clockwise, top-left, Move, [M]); M = X), 
+    append(Board, Move, Z), sort(Z, MyNextBoard), OtherNextBoard = OtherBoard, 
+    D=clockwise, Q=top-left, !.
 
 replace(_, _, [], []).
 replace(O, R, [O|T], [R|T2]) :- replace(O, R, T, T2).
@@ -120,8 +128,14 @@ rotateA(clockwise, bottom-right, List, NewList):-
     replace(22,a24,List8, NewList),
     !.
 
-rotate(clockwise, Direction, List, SortedNewList):- 
-    rotateA(clockwise, Direction, List, AList), replaceA(AList, NewList), sort(NewList, SortedNewList).
+rotate(clockwise, Q, List, SortedNewList):- 
+    rotateA(clockwise, Q, List, AList), replaceA(AList, NewList), sort(NewList, SortedNewList).
+
+rotate(anti-clockwise, Q, List, SortedNewList):- 
+    rotateA(clockwise, Q, List, AList), replaceA(AList, List1),
+    rotateA(clockwise, Q, List1, AList1), replaceA(AList1, List2),
+    rotateA(clockwise, Q, List2, AList2), replaceA(AList2, NewList),
+    sort(NewList, SortedNewList).
 
 replaceA([], []).
 replaceA([O|T], [RA|T2]) :- atom_concat(a, R, O),  atom_number(R, RA), replaceA( T, T2), !.
